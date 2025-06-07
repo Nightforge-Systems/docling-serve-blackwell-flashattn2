@@ -1,0 +1,46 @@
+# Docker and container artifacts
+*.log
+last_container_log.log
+container-logs.txt
+debug-output.txt
+
+# Environment configuration (keep template, ignore local copies)
+compose.env.local
+*.env.local
+
+# Model cache and artifacts (can be large)
+docling-artifacts/
+models/
+.hf_cache/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/ 

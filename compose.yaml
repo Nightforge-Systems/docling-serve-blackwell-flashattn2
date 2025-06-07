@@ -1,0 +1,98 @@
+services:
+  docling_blackwell:
+    image: docling-serve:blackwell-fa2
+    container_name: docling-blackwell-prod
+    restart: unless-stopped
+    user: root  # Required for model initialization and permissions
+    env_file:
+      - compose.env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0"]
+              capabilities: [gpu]
+
+    ports:
+      - "5001:5001"  # Expose port for direct access
+
+    # Initialize models then start service
+    # The init-models.sh script downloads all required models before starting
+    # This may take 5-10 minutes on first run, depending on internet speed
+    # UI is controlled via DOCLING_SERVE_ENABLE_UI environment variable
+    entrypoint: >
+      /bin/bash -c "
+        /usr/local/bin/init-models.sh &&
+        exec docling-serve run
+      "
+
+    environment:
+      # ───── GPU ───────────────────────────────────────────────
+      NVIDIA_VISIBLE_DEVICES: "${NVIDIA_VISIBLE_DEVICES:-0}"
+      DOCLING_CUDA_USE_FLASH_ATTENTION2: "${DOCLING_CUDA_USE_FLASH_ATTENTION2:-1}"
+      DOCLING_OCR_DEVICE: "${DOCLING_OCR_DEVICE:-cuda}"
+      DOCLING_WARMUP_MODELS: "${DOCLING_WARMUP_MODELS:-true}"
+
+      # ───── LOGGING ───────────────────────────────────────────
+      DOCLING_SERVE_LOG_LEVEL: "${DOCLING_SERVE_LOG_LEVEL:-INFO}"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+
+      # ───── QUEUE & CPU THREADING ────────────────────────────
+      DOCLING_SERVE_QUEUE_ENGINE: async_local
+      UVICORN_WORKERS: "${UVICORN_WORKERS:-1}"
+      DOCLING_SERVE_QUEUE_ASYNC_LOCAL_NUM_WORKERS: "${DOCLING_SERVE_QUEUE_ASYNC_LOCAL_NUM_WORKERS:-16}"
+      TORCH_NUM_THREADS: "${TORCH_NUM_THREADS:-8}"
+      OMP_NUM_THREADS: "${OMP_NUM_THREADS:-8}"
+      MKL_NUM_THREADS: "${MKL_NUM_THREADS:-8}"
+      OPENBLAS_NUM_THREADS: "${OPENBLAS_NUM_THREADS:-8}"
+      NUMEXPR_MAX_THREADS: "${NUMEXPR_MAX_THREADS:-8}"
+      DOCLING_SERVE_MAX_SYNC_WAIT: "${DOCLING_SERVE_MAX_SYNC_WAIT:-600}"
+
+      # ───── OCR ENGINE ───────────────────────────────────────
+      DOCLING_OCR_ENGINE: "${DOCLING_OCR_ENGINE:-easyocr}"
+      DOCLING_SERVE_FORCE_OCR_ENGINE: "${DOCLING_SERVE_FORCE_OCR_ENGINE:-easyocr}"
+
+      # ───── UI CONFIGURATION ─────────────────────────────────
+      DOCLING_SERVE_ENABLE_UI: "${DOCLING_SERVE_ENABLE_UI:-false}"
+
+      # ───── MODEL DOWNLOAD FLAGS ─────────────────────────────
+      DOCLING_SERVE_OCR_EASYOCR_DOWNLOAD_ENABLED: "${DOCLING_SERVE_OCR_EASYOCR_DOWNLOAD_ENABLED:-true}"
+      DOCLING_DISABLE_MODEL_DOWNLOADS: "${DOCLING_DISABLE_MODEL_DOWNLOADS:-false}"
+      DOCLING_AUTO_DOWNLOAD: "${DOCLING_AUTO_DOWNLOAD:-true}"
+      EASYOCR_MODULE_PATH: /models/EasyOcr
+      HF_HUB_OFFLINE: "${HF_HUB_OFFLINE:-0}"
+
+      # ───── DEFAULT CONVERT ARGS ─────────────────────────────
+      DOCLING_SERVE_CONVERT_ARGS: >
+        -vv
+        --num-threads ${DOCLING_CONVERT_NUM_THREADS:-8}
+        --to md,json
+        --image-export-mode placeholder
+        --pipeline standard
+        --ocr --ocr-engine easyocr
+        --pdf-backend dlparse_v4
+        --table-mode accurate
+        --enrich-code
+
+      # ───── MODEL & CACHE PATHS ──────────────────────────────
+      DOCLING_ARTIFACTS_PATH: /models
+      DOCLING_SERVE_ARTIFACTS_PATH: /models
+      HF_HOME: /models/.hf_cache
+      HUGGINGFACE_HUB_CACHE: /models/.hf_cache
+
+    volumes:
+      - docling_cache:/root/.cache
+      - docling_artifacts:/models
+
+    networks:
+      - stack_network
+
+volumes:
+  docling_cache:
+  docling_artifacts:
+
+networks:
+  stack_network:
+    external: true
+    name: docling_network
