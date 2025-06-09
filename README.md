@@ -19,7 +19,6 @@ docker compose up -d
 docker compose logs -f
 ```
 
-**API Endpoint**: `http://localhost:5001/v1alpha/convert/source`  
 **UI Access** (if enabled): `http://localhost:5001/ui`
 
 ## 🏗️ Building
@@ -47,11 +46,20 @@ DOCKER_BUILDKIT=1 docker build . -f dockerfile -t docling-serve:blackwell-fa2 \
 
 ## ⚙️ Configuration
 
-### Environment Variables## 📚 Resources
+### Environment Variables
 
-- [Docling-Serve Documentation](https://docling-project.github.io/docling/)
-- [FlashAttention-2 Paper](https://tridao.me/publications/flash2/flash2.pdf)
-- [NVIDIA Blackwell Architecture](https://developer.nvidia.com/blackwell-architecture)
+Performance tuning is configured via `compose.env`. Key variables:
+
+```bash
+# GPU Configuration
+NVIDIA_VISIBLE_DEVICES=0
+DOCLING_CUDA_USE_FLASH_ATTENTION2=1
+
+# Threading (adjust for your CPU)
+TORCH_NUM_THREADS=8
+DOCLING_SERVE_QUEUE_ASYNC_LOCAL_NUM_WORKERS=16
+
+# Processing Timeouts
 DOCLING_SERVE_MAX_SYNC_WAIT=600
 
 # Logging
