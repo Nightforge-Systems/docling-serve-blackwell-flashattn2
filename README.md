@@ -122,6 +122,7 @@ docker run -d \
 - **FlashAttention-2**: Native SM 120 compilation for RTX 5090
 - **PyTorch Nightly**: CUDA 12.8 with Blackwell support
 - **EasyOCR**: GPU-accelerated text extraction
+- **SmolVLM**: Vision model for image description in documents
 - **Multi-stage Build**: Optimized production image
 
 ### Performance Benefits
@@ -135,6 +136,26 @@ docker run -d \
 - **Primary**: NVIDIA RTX 5090 (Blackwell)
 - **Compatible**: CUDA 12.8+ capable GPUs
 - **Driver**: R570+ required
+
+## 🖼️ Image Description Feature
+
+This build includes support for the **"Describe Pictures in Documents"** feature using the SmolVLM-256M-Instruct model. This allows the system to:
+
+- **Automatically describe images** found in documents
+- **Generate alt-text** for accessibility
+- **Provide context** for visual content in documents
+
+### Usage
+1. Enable the feature in Open WebUI settings
+2. Set the vision model to "Default" 
+3. Upload documents with images
+4. The system will automatically describe any images found
+
+### Model Details
+- **Model**: SmolVLM-256M-Instruct
+- **Size**: ~256M parameters
+- **Capabilities**: Image understanding and description
+- **Download**: Automatically downloaded during container initialization
 
 ## 🩺 Troubleshooting
 
@@ -192,6 +213,18 @@ import torch
 print(f'CUDA available: {torch.cuda.is_available()}')
 print(f'Device count: {torch.cuda.device_count()}')
 "
+```
+
+#### Vision Model Issues
+```bash
+# Check if SmolVLM model is downloaded
+docker exec -it docling-blackwell-prod ls -la /models/models--HuggingFaceTB--SmolVLM-256M-Instruct
+
+# Manually download vision models
+docker exec -it docling-blackwell-prod /usr/local/bin/download-vision-models.sh
+
+# Check vision model files
+docker exec -it docling-blackwell-prod find /models -name "*SmolVLM*" -type f
 ```
 
 ### Recovery Procedures
