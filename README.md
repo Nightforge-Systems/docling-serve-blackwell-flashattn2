@@ -122,6 +122,7 @@ docker run -d \
 - **FlashAttention-2**: Native SM 120 compilation for RTX 5090
 - **PyTorch Nightly**: CUDA 12.8 with Blackwell support
 - **EasyOCR**: GPU-accelerated text extraction
+- **SmolVLM**: Vision model for image description in documents
 - **Multi-stage Build**: Optimized production image
 
 ### Performance Benefits
@@ -135,6 +136,28 @@ docker run -d \
 - **Primary**: NVIDIA RTX 5090 (Blackwell)
 - **Compatible**: CUDA 12.8+ capable GPUs
 - **Driver**: R570+ required
+
+## 🖼️ Image Description Feature
+
+This build includes support for the **"Describe Pictures in Documents"** feature. This allows the system to:
+
+- **Automatically describe images** found in documents
+- **Generate alt-text** for accessibility
+- **Provide context** for visual content in documents
+
+### Configuration
+The vision model functionality is configured through docling-serve's VLM pipeline. The system will automatically download and use vision models from HuggingFace Hub as needed.
+
+### Usage
+1. Enable the feature in Open WebUI settings
+2. Set the vision model to "Default" 
+3. Upload documents with images
+4. The system will automatically describe any images found
+
+### Supported Models
+- **SmolVLM-256M-Instruct**: Compact vision-language model
+- **Other HuggingFace VLMs**: Can be configured via environment variables
+- **Auto-download**: Models are fetched from HuggingFace Hub when needed
 
 ## 🩺 Troubleshooting
 
@@ -192,6 +215,26 @@ import torch
 print(f'CUDA available: {torch.cuda.is_available()}')
 print(f'Device count: {torch.cuda.device_count()}')
 "
+```
+
+#### Vision Model Issues
+```bash
+# Check HuggingFace Hub connectivity
+docker exec -it docling-blackwell-prod python3 -c "
+from huggingface_hub import HfApi
+api = HfApi()
+print('HuggingFace Hub accessible:', api.repo_exists('HuggingFaceTB/SmolVLM-256M-Instruct'))
+"
+
+# Test vision model access
+docker exec -it docling-blackwell-prod python3 -c "
+from transformers import AutoProcessor
+processor = AutoProcessor.from_pretrained('HuggingFaceTB/SmolVLM-256M-Instruct')
+print('✓ Vision model accessible from HuggingFace Hub')
+"
+
+# Check if error is repository format related
+docker logs docling-blackwell-prod | grep -i "repo.*id.*must.*be.*in.*the.*form"
 ```
 
 ### Recovery Procedures

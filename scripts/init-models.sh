@@ -30,6 +30,7 @@ mkdir -p /models/EasyOcr
 mkdir -p /models/models--IBM--DocLayNet-base
 mkdir -p /models/models--unstructured-io--detectron2-layout-base-VGT
 mkdir -p /models/docling_models
+
 chown -R root:root /models
 
 # Set environment variables for model downloads
@@ -183,6 +184,8 @@ except Exception as e:
     print(f'[INIT] ⚠️  EasyOCR initialization failed: {e}')
     print('[INIT] Continuing without EasyOCR models...')
 "
+
+
 
 # Verify what models were downloaded
 echo "[INIT] Checking downloaded models..."
