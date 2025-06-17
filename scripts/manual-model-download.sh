@@ -82,26 +82,4 @@ print('[MANUAL] Manual download attempt completed')
 echo "[MANUAL] Attempting to create symlinks after manual download..."
 /usr/local/bin/fix-model-links.sh
 
-echo "[MANUAL] Manual model download script completed"
-
-# Download SmolVLM model for image description
-echo "[MANUAL] Downloading SmolVLM model for image description..."
-python3 -c "
-import os
-from huggingface_hub import snapshot_download
-import warnings
-warnings.filterwarnings('ignore')
-
-try:
-    print('[MANUAL] Downloading SmolVLM-256M-Instruct model...')
-    model_path = snapshot_download(
-        repo_id='HuggingFaceTB/SmolVLM-256M-Instruct',
-        cache_dir='/models/.hf_cache',
-        local_dir='/models/models--HuggingFaceTB--SmolVLM-256M-Instruct',
-        local_dir_use_symlinks=False
-    )
-    print(f'[MANUAL] ✓ SmolVLM model downloaded to: {model_path}')
-except Exception as e:
-    print(f'[MANUAL] ⚠️  SmolVLM model download failed: {e}')
-    print('[MANUAL] Image description feature may not work properly')
-" 
+echo "[MANUAL] Manual model download script completed" 

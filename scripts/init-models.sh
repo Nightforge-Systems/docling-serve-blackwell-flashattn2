@@ -30,7 +30,7 @@ mkdir -p /models/EasyOcr
 mkdir -p /models/models--IBM--DocLayNet-base
 mkdir -p /models/models--unstructured-io--detectron2-layout-base-VGT
 mkdir -p /models/docling_models
-mkdir -p /models/models--HuggingFaceTB--SmolVLM-256M-Instruct
+
 chown -R root:root /models
 
 # Set environment variables for model downloads
@@ -185,27 +185,7 @@ except Exception as e:
     print('[INIT] Continuing without EasyOCR models...')
 "
 
-# Download SmolVLM model for image description functionality
-echo "[INIT] Downloading SmolVLM model for image description..."
-python3 -c "
-import os
-from huggingface_hub import snapshot_download
-import warnings
-warnings.filterwarnings('ignore')
 
-try:
-    print('[INIT] Downloading SmolVLM-256M-Instruct model...')
-    model_path = snapshot_download(
-        repo_id='HuggingFaceTB/SmolVLM-256M-Instruct',
-        cache_dir='/models/.hf_cache',
-        local_dir='/models/models--HuggingFaceTB--SmolVLM-256M-Instruct',
-        local_dir_use_symlinks=False
-    )
-    print(f'[INIT] ✓ SmolVLM model downloaded to: {model_path}')
-except Exception as e:
-    print(f'[INIT] ⚠️  SmolVLM model download failed: {e}')
-    print('[INIT] Image description feature may not work properly')
-"
 
 # Verify what models were downloaded
 echo "[INIT] Checking downloaded models..."
@@ -230,8 +210,7 @@ critical_paths = [
     '/models/.hf_cache',
     '/models/EasyOcr',
     '/models/models--IBM--DocLayNet-base',
-    '/models/models--unstructured-io--detectron2-layout-base-VGT',
-    '/models/models--HuggingFaceTB--SmolVLM-256M-Instruct'
+    '/models/models--unstructured-io--detectron2-layout-base-VGT'
 ]
 
 print('[INIT] Checking critical model paths:')

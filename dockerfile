@@ -75,8 +75,7 @@ COPY scripts/init-models.sh /usr/local/bin/init-models.sh
 COPY scripts/debug-models.sh /usr/local/bin/debug-models.sh
 COPY scripts/fix-model-links.sh /usr/local/bin/fix-model-links.sh
 COPY scripts/manual-model-download.sh /usr/local/bin/manual-model-download.sh
-COPY scripts/download-vision-models.sh /usr/local/bin/download-vision-models.sh
-RUN chmod +x /usr/local/bin/init-models.sh /usr/local/bin/debug-models.sh /usr/local/bin/fix-model-links.sh /usr/local/bin/manual-model-download.sh /usr/local/bin/download-vision-models.sh
+RUN chmod +x /usr/local/bin/init-models.sh /usr/local/bin/debug-models.sh /usr/local/bin/fix-model-links.sh /usr/local/bin/manual-model-download.sh
 
 # Install minimal runtime dependencies (EasyOCR is primary OCR engine)
 RUN apt-get update && apt-get install -y --no-install-recommends \

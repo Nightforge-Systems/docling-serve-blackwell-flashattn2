@@ -139,11 +139,14 @@ docker run -d \
 
 ## 🖼️ Image Description Feature
 
-This build includes support for the **"Describe Pictures in Documents"** feature using the SmolVLM-256M-Instruct model. This allows the system to:
+This build includes support for the **"Describe Pictures in Documents"** feature. This allows the system to:
 
 - **Automatically describe images** found in documents
 - **Generate alt-text** for accessibility
 - **Provide context** for visual content in documents
+
+### Configuration
+The vision model functionality is configured through docling-serve's VLM pipeline. The system will automatically download and use vision models from HuggingFace Hub as needed.
 
 ### Usage
 1. Enable the feature in Open WebUI settings
@@ -151,11 +154,10 @@ This build includes support for the **"Describe Pictures in Documents"** feature
 3. Upload documents with images
 4. The system will automatically describe any images found
 
-### Model Details
-- **Model**: SmolVLM-256M-Instruct
-- **Size**: ~256M parameters
-- **Capabilities**: Image understanding and description
-- **Download**: Automatically downloaded during container initialization
+### Supported Models
+- **SmolVLM-256M-Instruct**: Compact vision-language model
+- **Other HuggingFace VLMs**: Can be configured via environment variables
+- **Auto-download**: Models are fetched from HuggingFace Hub when needed
 
 ## 🩺 Troubleshooting
 
@@ -217,14 +219,22 @@ print(f'Device count: {torch.cuda.device_count()}')
 
 #### Vision Model Issues
 ```bash
-# Check if SmolVLM model is downloaded
-docker exec -it docling-blackwell-prod ls -la /models/models--HuggingFaceTB--SmolVLM-256M-Instruct
+# Check HuggingFace Hub connectivity
+docker exec -it docling-blackwell-prod python3 -c "
+from huggingface_hub import HfApi
+api = HfApi()
+print('HuggingFace Hub accessible:', api.repo_exists('HuggingFaceTB/SmolVLM-256M-Instruct'))
+"
 
-# Manually download vision models
-docker exec -it docling-blackwell-prod /usr/local/bin/download-vision-models.sh
+# Test vision model access
+docker exec -it docling-blackwell-prod python3 -c "
+from transformers import AutoProcessor
+processor = AutoProcessor.from_pretrained('HuggingFaceTB/SmolVLM-256M-Instruct')
+print('✓ Vision model accessible from HuggingFace Hub')
+"
 
-# Check vision model files
-docker exec -it docling-blackwell-prod find /models -name "*SmolVLM*" -type f
+# Check if error is repository format related
+docker logs docling-blackwell-prod | grep -i "repo.*id.*must.*be.*in.*the.*form"
 ```
 
 ### Recovery Procedures
